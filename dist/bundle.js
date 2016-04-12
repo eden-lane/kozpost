@@ -452,6 +452,10 @@
 
 	                var value = data[name];
 
+	                if (name === 'chat_id') {
+	                    value = '@' + value;
+	                }
+
 	                buffer.push(encodeURIComponent(name) + '=' + encodeURIComponent(value === null ? '' : value));
 	            }
 
