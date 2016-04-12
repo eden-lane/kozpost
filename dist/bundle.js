@@ -428,6 +428,7 @@
 	        this.message = {
 	            chat_id: '',
 	            text: '',
+	            parse_mode: 'Markdown',
 	            disable_web_page_preview: false,
 	            disable_notification: false
 	        };
@@ -436,6 +437,27 @@
 	    }
 
 	    _createClass(MainCtrl, [{
+	        key: '_serialize',
+	        value: function _serialize(data) {
+	            if (!angular.isObject(data)) {
+	                return data === null ? '' : data.toString();
+	            }
+
+	            var buffer = [];
+
+	            for (var name in data) {
+	                if (!data.hasOwnProperty(name)) {
+	                    continue;
+	                }
+
+	                var value = data[name];
+
+	                buffer.push(encodeURIComponent(name) + '=' + encodeURIComponent(value === null ? '' : value));
+	            }
+
+	            return buffer.join('&').replace(/%20/g, '+');
+	        }
+	    }, {
 	        key: '_getUrl',
 	        value: function _getUrl(method) {
 	            if (!angular.isString(method) || method === '') {
@@ -447,9 +469,14 @@
 	    }, {
 	        key: '__sendPartial',
 	        value: function __sendPartial($http) {
-	            var url = this._getUrl('sendMessage');
-
-	            $http.post(url, this.message);
+	            $http({
+	                method: 'POST',
+	                url: this._getUrl('sendMessage'),
+	                data: this._serialize(this.message),
+	                headers: {
+	                    'Content-Type': 'application/x-www-form-urlencoded'
+	                }
+	            });
 	        }
 	    }]);
 

@@ -5,11 +5,34 @@ export default class MainCtrl {
         this.message = {
             chat_id: '',
             text: '',
+            parse_mode: 'Markdown',
             disable_web_page_preview: false,
             disable_notification: false
         };
 
         this.send = this.__sendPartial.bind(this, $http);
+    }
+
+    _serialize(data) {
+        if (!angular.isObject(data)) {
+            return data === null ? '' : data.toString();
+        }
+
+        let buffer = [];
+
+        for (var name in data) {
+            if (!data.hasOwnProperty(name)) {
+                continue;
+            }
+
+            let value = data[name];
+
+            buffer.push(
+                encodeURIComponent(name) + '=' + encodeURIComponent(value === null ? '' : value)
+            );
+        }
+
+        return buffer.join('&').replace(/%20/g, '+');
     }
 
     _getUrl(method) {
@@ -21,9 +44,14 @@ export default class MainCtrl {
     }
 
     __sendPartial($http) {
-        var url = this._getUrl('sendMessage');
-
-        $http.post(url, this.message);
+        $http({
+            method: 'POST',
+            url:  this._getUrl('sendMessage'),
+            data: this._serialize(this.message),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
     }
 }
 
