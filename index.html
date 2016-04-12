@@ -2,6 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
               integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
@@ -9,8 +10,50 @@
     </head>
     <body data-ng-app="app">
         <script type="text/javascript" src="dist/bundle.js" charset="utf-8"></script>
-        <div data-ng-controller="MainCtrl">
-
+        <div class="container"
+             data-ng-controller="MainCtrl as main">
+            <div class="page-header">
+                <h1>Kozpost <small>A convenient web interface for your telegram bot</small></h1>
+            </div>
+            <form data-ng-submit="main.send()">
+                <div class="form-group">
+                    <div class="input-group">
+                        <input type="text" placeholder="Token" class="form-control"
+                               data-ng-model="main.token">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-info">Save</button>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <input type="text" placeholder="Target" class="form-control"
+                               data-ng-model="main.message.chat_id">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-info">Save</button>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <textarea rows="5" placeholder="Message" class="form-control"
+                              data-ng-model="main.message.text"></textarea>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox"
+                               data-ng-model="main.message.disable_notification"> Silent
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox"
+                               data-ng-model="main.message.disable_web_page_preview"> No previews
+                    </label>
+                </div>
+                <div class="form-group text-right">
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </div>
+            </form>
         </div>
     </body>
 </html>
