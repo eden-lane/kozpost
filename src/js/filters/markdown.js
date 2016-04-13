@@ -22,7 +22,7 @@ export default function() {
         result = result.replace(/`(.*)`/g, '<code>$1</code>');
         result = result.replace(/_(.*)_/g, '<em>$1</em>');
         result = result.replace(/\*(.*)\*/g, '<strong>$1</strong>');
-        result = result.replace(/\[(\w+)\](\([^\]]*\))/g, '<a href="$2">$1</a>');
+        result = result.replace(/\[(\w+)\](\([^\)\]]*\))/g, '<a href="$2">$1</a>');
 
         return result;
     };
