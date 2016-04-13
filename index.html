@@ -11,50 +11,89 @@
     <body data-ng-app="app">
         <script type="text/javascript" src="dist/bundle.js" charset="utf-8"></script>
         <div class="container"
-             data-ng-controller="MainCtrl as main">
+             data-ng-controller="MainCtrl as main"
+             data-ng-switch="!main.user">
             <div class="page-header">
-                <h1>Kozpost <small>A convenient web interface for your telegram bot</small></h1>
+                <h1>KozPost <small>A convenient web interface for your telegram bot</small></h1>
             </div>
-            <form data-ng-submit="main.send()">
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <input type="password" placeholder="Token" class="form-control"
-                                   data-ng-model="main.token">
-                        </div>
-                        <div class="col-sm-6">
+            <div class="row" data-ng-switch-when="true">
+                <div class="col-md-6">
+                    <form data-ng-submit="main.login()">
+                        <div class="form-group">
                             <div class="input-group">
-                                <div class="input-group-addon">@</div>
-                                <input type="text" placeholder="Target" class="form-control"
-                                       data-ng-model="main.message.chat_id">
+                                <input type="password" class="form-control" placeholder="Bot API Token"
+                                       data-ng-model="main.token">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-success" type="submit"
+                                            data-ng-disabled="main.token === '' || main.loading"
+                                            data-ng-class="{ 'btn-spinner': main.loading }">Login</button>
+                                </span>
                             </div>
+                        </div>
+                        <div class="alert alert-danger" role="alert"
+                             data-ng-if="main.error">
+                            <button type="button" class="close" aria-label="Close"
+                                    data-ng-click="main.error = false"><span aria-hidden="true">&times;</span></button>
+                            <strong>Invalid token!</strong> Make sure to copy the string of 40+ characters.
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Set up your own telegram bot</div>
+                        <div class="panel-body">
+                            <ol>
+                                <li>contact <a href="https://telegram.me/botfather">@BotFather</a></li>
+                                <li>create a new bot with the <strong>/newbot</strong> command</li>
+                                <li>The BotFather will give you a <strong>token</strong>, use it to log in</li>
+                                <li>enjoy posting like a <strong>BOSS</strong></li>
+                            </ol>
                         </div>
                     </div>
                 </div>
-                <div class="form-group text-right">
-                    <button type="button" class="btn btn-info" disabled>Save</button>
+            </div>
+            <div class="row" data-ng-switch-when="false">
+                <div class="col-md-6">
+                    <h4 class="k-user"><button type="button" class="btn btn-warning btn-xs" data-ng-click="main.logout()">Logout</button> {{main.user.first_name}} <small>{{'@' + main.user.username}}</small></h4>
+                    <form data-ng-submit="main.send()">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="@channel" required
+                                   data-ng-disabled="main.loading"
+                                   data-ng-model="main.message.chat_id" />
+                        </div>
+                        <div class="form-group">
+                            <textarea rows="5" class="k-message form-control" placeholder="Message" required
+                                      data-ng-disabled="main.loading"
+                                      data-ng-model="main.message.text"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" data-ng-model="main.message.disable_notification"> <abbr title="Subscribers won't receive notification">Silent</abbr>
+                            </label>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" data-ng-model="main.message.disable_web_page_preview"> Hide page preview
+                            </label>
+                        </div>
+                        <div class="form-group text-right">
+                            <button class="btn btn-primary" type="submit"
+                                    data-ng-disabled="main.loading"
+                                    data-ng-class="{ 'btn-spinner': main.loading }">Send</button>
+                        </div>
+                        <div class="alert" role="alert"
+                             data-ng-if="main.result"
+                             data-ng-class="{ 'alert-danger': !main.result.success, 'alert-success': main.result.success }">
+                           <strong>{{main.result.title}}</strong> {{main.result.text}}
+                           <button type="button" class="close" aria-label="Close"
+                                   data-ng-click="main.result = null"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                    </form>
                 </div>
-                <hr />
-                <div class="form-group">
-                    <textarea rows="5" placeholder="Message" class="form-control"
-                              data-ng-model="main.message.text"></textarea>
+                <div class="col-md-6">
+                    <div class="well well-sm">
+                        More features coming soon&hellip;
+                    </div>
                 </div>
-                <div class="checkbox">
-                    <label>
-                        <input type="checkbox"
-                               data-ng-model="main.message.disable_notification"> Silent
-                    </label>
-                </div>
-                <div class="checkbox">
-                    <label>
-                        <input type="checkbox"
-                               data-ng-model="main.message.disable_web_page_preview"> No previews
-                    </label>
-                </div>
-                <div class="form-group text-right">
-                    <button type="submit" class="btn btn-primary">Send</button>
-                </div>
-            </form>
+            </div>
         </div>
     </body>
 </html>

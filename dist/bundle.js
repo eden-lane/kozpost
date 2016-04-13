@@ -93,7 +93,7 @@
 
 
 	// module
-	exports.push([module.id, "", ""]);
+	exports.push([module.id, ".btn-spinner {\n  position: relative;\n  color: transparent !important;\n}\n.btn-spinner:before,\n.btn-spinner:after {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  content: '';\n  width: 20px;\n  height: 20px;\n  margin-top: -10px;\n  margin-left: -10px;\n  border: 2px solid rgba(0, 0, 0, 0.2);\n  border-radius: 50%;\n}\n.btn-spinner:after {\n  border-color: transparent;\n  border-top-color: #808080;\n  box-shadow: 0 0 0 1px transparent;\n  animation: spin .6s linear;\n  animation-iteration-count: infinite;\n}\n.k-user {\n  line-height: 22px;\n}\n.k-message {\n  resize: vertical;\n  overflow: auto;\n}\n", ""]);
 
 	// exports
 
@@ -423,7 +423,7 @@
 	    function MainCtrl($http) {
 	        _classCallCheck(this, MainCtrl);
 
-	        this.token = '';
+	        this.loading = false;
 
 	        this.message = {
 	            chat_id: '',
@@ -433,7 +433,27 @@
 	            disable_notification: false
 	        };
 
-	        this.send = this.__sendPartial.bind(this, $http);
+	        var cache = localStorage.getItem(MainCtrl.CACHE);
+
+	        if (cache) {
+	            var parsed = JSON.parse(cache);
+
+	            this.token = parsed.token;
+	            this.user = parsed.user;
+
+	            this.message.chat_id = parsed.channel || '';
+	        } else {
+	            this.token = '';
+	            this.user = null;
+	        }
+
+	        this.error = false;
+
+	        this.result = null;
+
+	        this._postForm = this.__postFormPartial.bind(this, $http);
+
+	        this.login = this.__loginPartial.bind(this, $http);
 	    }
 
 	    _createClass(MainCtrl, [{
@@ -452,10 +472,6 @@
 
 	                var value = data[name];
 
-	                if (name === 'chat_id') {
-	                    value = '@' + value;
-	                }
-
 	                buffer.push(encodeURIComponent(name) + '=' + encodeURIComponent(value === null ? '' : value));
 	            }
 
@@ -471,15 +487,76 @@
 	            return MainCtrl.API + this.token + '/' + method;
 	        }
 	    }, {
-	        key: '__sendPartial',
-	        value: function __sendPartial($http) {
-	            $http({
+	        key: '_onLogin',
+	        value: function _onLogin(data) {
+	            this.user = data.result;
+
+	            localStorage.setItem(MainCtrl.CACHE, JSON.stringify({
+	                token: this.token,
+	                user: this.user
+	            }));
+	        }
+	    }, {
+	        key: '_onPublished',
+	        value: function _onPublished(data) {
+	            var cache = JSON.parse(localStorage.getItem(MainCtrl.CACHE));
+
+	            cache.channel = this.message.chat_id;
+
+	            localStorage.setItem(MainCtrl.CACHE, JSON.stringify(cache));
+
+	            this.result = {
+	                success: true,
+	                title: 'Post successfull!'
+	            };
+	        }
+	    }, {
+	        key: '__loginPartial',
+	        value: function __loginPartial($http) {
+	            var _this = this;
+
+	            this.loading = true;
+
+	            $http.get(this._getUrl('getMe')).success(this._onLogin.bind(this)).error(function () {
+	                return _this.error = true;
+	            }).finally(function () {
+	                return _this.loading = false;
+	            });
+	        }
+	    }, {
+	        key: '__postFormPartial',
+	        value: function __postFormPartial($http, method, data) {
+	            return $http({
 	                method: 'POST',
-	                url: this._getUrl('sendMessage'),
-	                data: this._serialize(this.message),
+	                url: this._getUrl(method),
+	                data: this._serialize(data),
 	                headers: {
 	                    'Content-Type': 'application/x-www-form-urlencoded'
 	                }
+	            });
+	        }
+	    }, {
+	        key: 'logout',
+	        value: function logout() {
+	            this.token = '';
+	            this.user = null;
+	            localStorage.removeItem(MainCtrl.CACHE);
+	        }
+	    }, {
+	        key: 'send',
+	        value: function send() {
+	            var _this2 = this;
+
+	            this.loading = true;
+
+	            this._postForm('sendMessage', this.message).success(this._onPublished.bind(this)).error(function () {
+	                return _this2.result = {
+	                    success: false,
+	                    title: 'Post failed!',
+	                    text: 'Check if the channel exists & your bot is added as administrator'
+	                };
+	            }).finally(function () {
+	                return _this2.loading = false;
 	            });
 	        }
 	    }]);
@@ -492,6 +569,7 @@
 
 	MainCtrl.$inject = ['$http'];
 
+	MainCtrl.CACHE = 'kozpost:cache';
 	MainCtrl.API = 'https://api.telegram.org/bot';
 
 /***/ }
