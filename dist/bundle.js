@@ -610,8 +610,8 @@
 	    }
 
 	    return function (input, config) {
-	        if (input === '') {
-	            return input;
+	        if (input === '' || !angular.isDefined(input)) {
+	            return '';
 	        }
 
 	        var result = void 0;
