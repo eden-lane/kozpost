@@ -52,11 +52,21 @@
 
 	var _main2 = _interopRequireDefault(_main);
 
+	var _markdown = __webpack_require__(6);
+
+	var _markdown2 = _interopRequireDefault(_markdown);
+
+	var _hotReplace = __webpack_require__(7);
+
+	var _hotReplace2 = _interopRequireDefault(_hotReplace);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var app = angular.module('app', []);
+	var app = angular.module('app', ['ngSanitize']);
 
 	app.controller('MainCtrl', _main2.default);
+	app.filter('markdown', _markdown2.default);
+	app.directive('hotReplace', _hotReplace2.default.factory());
 
 /***/ },
 /* 1 */
@@ -93,7 +103,7 @@
 
 
 	// module
-	exports.push([module.id, "@keyframes spin {\n  from {\n    transform: rotate(0deg);\n  }\n  to {\n    transform: rotate(360deg);\n  }\n}\n.btn-spinner {\n  position: relative;\n  color: transparent !important;\n}\n.btn-spinner:before,\n.btn-spinner:after {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  content: '';\n  width: 20px;\n  height: 20px;\n  margin-top: -10px;\n  margin-left: -10px;\n  border: 2px solid rgba(0, 0, 0, 0.2);\n  border-radius: 50%;\n}\n.btn-spinner:after {\n  border-color: transparent;\n  border-top-color: #808080;\n  box-shadow: 0 0 0 1px transparent;\n  animation: spin .6s linear;\n  animation-iteration-count: infinite;\n}\n.k-user {\n  line-height: 22px;\n}\n.k-message {\n  resize: vertical;\n  overflow: auto;\n}\n", ""]);
+	exports.push([module.id, "@keyframes spin {\n  from {\n    transform: rotate(0deg);\n  }\n  to {\n    transform: rotate(360deg);\n  }\n}\n.btn-spinner {\n  position: relative;\n  color: transparent !important;\n}\n.btn-spinner:before,\n.btn-spinner:after {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  content: '';\n  width: 20px;\n  height: 20px;\n  margin-top: -10px;\n  margin-left: -10px;\n  border: 2px solid rgba(0, 0, 0, 0.2);\n  border-radius: 50%;\n}\n.btn-spinner:after {\n  border-color: transparent;\n  border-top-color: white;\n  box-shadow: 0 0 0 1px transparent;\n  animation: spin .6s linear;\n  animation-iteration-count: infinite;\n}\n.k-user {\n  line-height: 22px;\n}\n.k-message {\n  resize: vertical;\n  overflow: auto;\n}\n", ""]);
 
 	// exports
 
@@ -536,6 +546,11 @@
 	            });
 	        }
 	    }, {
+	        key: 'getMdConfig',
+	        value: function getMdConfig() {
+	            return {};
+	        }
+	    }, {
 	        key: 'logout',
 	        value: function logout() {
 	            this.token = '';
@@ -571,6 +586,201 @@
 
 	MainCtrl.CACHE = 'kozpost:cache';
 	MainCtrl.API = 'https://api.telegram.org/bot';
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	exports.default = function () {
+	    function escapeHTML(str) {
+	        var div = document.createElement('div');
+	        div.appendChild(document.createTextNode(str));
+	        return div.innerHTML;
+	    }
+
+	    function wrapWith(str, char, tag) {
+	        var exp = new RegExp('\\' + char + '(.*)\\' + char);
+	        return str.replace(exp, '<' + tag + '>$1</' + tag + '>');
+	    }
+
+	    return function (input, config) {
+	        if (input === '') {
+	            return input;
+	        }
+
+	        var result = void 0;
+
+	        result = escapeHTML(input);
+	        result = result.replace(/(?:\r\n|\r|\n)/g, '<br />');
+	        result = result.replace(/`(.*)`/g, '<code>$1</code>');
+	        result = result.replace(/_(.*)_/g, '<em>$1</em>');
+	        result = result.replace(/\*(.*)\*/g, '<strong>$1</strong>');
+	        result = result.replace(/\[(\w+)\](\([^\]]*\))/g, '<a href="$2">$1</a>');
+
+	        return result;
+	    };
+	};
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _factory = __webpack_require__(8);
+
+	var _factory2 = _interopRequireDefault(_factory);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var HotReplaceDirective = function () {
+	    function HotReplaceDirective($parse) {
+	        _classCallCheck(this, HotReplaceDirective);
+
+	        this.restrict = 'A';
+	        this.require = 'ngModel';
+	        this.link = this.__linkUnboundPartial.bind(this, $parse);
+	    }
+
+	    _createClass(HotReplaceDirective, [{
+	        key: '_getInputSelection',
+	        value: function _getInputSelection(el) {
+	            var start = 0,
+	                end = 0;
+
+	            if (angular.isNumber(el.selectionStart) && angular.isNumber(el.selectionEnd)) {
+	                start = el.selectionStart;
+	                end = el.selectionEnd;
+	            } else {
+	                var range = document.selection.createRange();
+
+	                if (range && range.parentElement() === el) {
+	                    var len = el.value.length,
+	                        normalized = el.value.replace(/\r\n/g, '\n');
+
+	                    var textInputRange = el.createTextRange();
+
+	                    textInputRange.moveToBookmark(range.getBookmark());
+
+	                    var endRange = el.createTextRange();
+
+	                    endRange.collapse(false);
+
+	                    if (textInputRange.compareEndPoints('StartToEnd', endRange) > -1) {
+	                        start = end = len;
+	                    } else {
+	                        start = -textInputRange.moveStart('character', -len);
+	                        start += normalized.slice(0, start).split('\n').length - 1;
+
+	                        if (textInputRange.compareEndPoints('EndToEnd', endRange) > -1) {
+	                            end = len;
+	                        } else {
+	                            end = -textInputRange.moveEnd('character', -len);
+	                            end += normalized.slice(0, end).split('\n').length - 1;
+	                        }
+	                    }
+	                }
+	            }
+
+	            return { start: start, end: end };
+	        }
+	    }, {
+	        key: '_wrapWith',
+	        value: function _wrapWith(el, before, after) {
+	            if (!angular.isDefined(after)) {
+	                after = before;
+	            }
+
+	            var sel = this._getInputSelection(el),
+	                val = el.value,
+	                str = val.slice(sel.start, sel.end);
+
+	            return val.slice(0, sel.start) + before + str + after + val.slice(sel.end);
+	        }
+	    }, {
+	        key: '__onKeyDownPartial',
+	        value: function __onKeyDownPartial(setter, el, e) {
+	            if (e.ctrlKey && e.keyCode === 73) {
+	                console.log(setter);
+	                setter(this._wrapWith(el, '_'));
+	            }
+	        }
+	    }, {
+	        key: '__linkUnboundPartial',
+	        value: function __linkUnboundPartial($parse, scope, el, attrs, ngModelCtrl) {
+	            var getter = $parse(attrs['ngModel']),
+	                setter = getter.assign;
+
+	            document.onkeydown = function (e) {
+	                if (e.ctrlKey) {
+	                    switch (e.keyCode) {
+	                        case 66:
+	                            setter(scope, this._wrapWith(el[0], '*'));
+	                            scope.$digest();
+	                            break;
+	                        case 73:
+	                            setter(scope, this._wrapWith(el[0], '_'));
+	                            scope.$digest();
+	                            break;
+	                        case 75:
+	                            var link = prompt('Enter link', 'http://');
+	                            setter(scope, this._wrapWith(el[0], '[', '](' + link + ')'));
+	                            scope.$digest();
+	                            break;
+	                    }
+	                }
+	            }.bind(this);
+	        }
+	    }]);
+
+	    return HotReplaceDirective;
+	}();
+
+	exports.default = HotReplaceDirective;
+
+
+	HotReplaceDirective.$inject = ['$parse'];
+
+	HotReplaceDirective.factory = _factory2.default;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	exports.default = function () {
+	    var Fn = this;
+
+	    var directive = function directive() {
+	        var args = [null].concat(Array.prototype.slice.call(arguments));
+	        return new (Fn.bind.apply(Fn, args))();
+	    };
+
+	    directive.$inject = Fn.$inject;
+
+	    return directive;
+	};
+
+	;
 
 /***/ }
 /******/ ]);

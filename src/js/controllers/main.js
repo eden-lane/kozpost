@@ -105,6 +105,12 @@ export default class MainCtrl {
         });
     }
 
+    getMdConfig() {
+        return {
+
+        };
+    }
+
     logout() {
         this.token = '';
         this.user  = null;
