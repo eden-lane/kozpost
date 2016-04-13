@@ -93,7 +93,7 @@
 
 
 	// module
-	exports.push([module.id, ".btn-spinner {\n  position: relative;\n  color: transparent !important;\n}\n.btn-spinner:before,\n.btn-spinner:after {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  content: '';\n  width: 20px;\n  height: 20px;\n  margin-top: -10px;\n  margin-left: -10px;\n  border: 2px solid rgba(0, 0, 0, 0.2);\n  border-radius: 50%;\n}\n.btn-spinner:after {\n  border-color: transparent;\n  border-top-color: #808080;\n  box-shadow: 0 0 0 1px transparent;\n  animation: spin .6s linear;\n  animation-iteration-count: infinite;\n}\n.k-user {\n  line-height: 22px;\n}\n.k-message {\n  resize: vertical;\n  overflow: auto;\n}\n", ""]);
+	exports.push([module.id, "@keyframes spin {\n  from {\n    transform: rotate(0deg);\n  }\n  to {\n    transform: rotate(360deg);\n  }\n}\n.btn-spinner {\n  position: relative;\n  color: transparent !important;\n}\n.btn-spinner:before,\n.btn-spinner:after {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  content: '';\n  width: 20px;\n  height: 20px;\n  margin-top: -10px;\n  margin-left: -10px;\n  border: 2px solid rgba(0, 0, 0, 0.2);\n  border-radius: 50%;\n}\n.btn-spinner:after {\n  border-color: transparent;\n  border-top-color: #808080;\n  box-shadow: 0 0 0 1px transparent;\n  animation: spin .6s linear;\n  animation-iteration-count: infinite;\n}\n.k-user {\n  line-height: 22px;\n}\n.k-message {\n  resize: vertical;\n  overflow: auto;\n}\n", ""]);
 
 	// exports
 
@@ -507,7 +507,7 @@
 
 	            this.result = {
 	                success: true,
-	                title: 'Post successfull!'
+	                title: 'Post successful!'
 	            };
 	        }
 	    }, {
@@ -553,7 +553,7 @@
 	                return _this2.result = {
 	                    success: false,
 	                    title: 'Post failed!',
-	                    text: 'Check if the channel exists & your bot is added as administrator'
+	                    text: 'Check if the channel exists & your bot is added as an administrator'
 	                };
 	            }).finally(function () {
 	                return _this2.loading = false;
