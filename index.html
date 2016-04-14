@@ -100,9 +100,18 @@
                             <p><small>Check out project's <a href="https://github.com/5angel/kozpost">Github page</a> or contact author directly via telegram: <a href="https://telegram.me/kozulya">@kozulya</a></small></p>
                         <hr />
                         <div class="form-group text-right">
+                            <button class="btn btn-warning" type="button"
+                                    data-ng-if="main.isPublished()"
+                                    data-ng-disabled="main.loading"
+                                    data-ng-click="main.clear()">Cancel</button>
                             <button class="btn btn-primary" type="submit"
                                     data-ng-disabled="main.loading"
-                                    data-ng-class="{ 'btn-spinner': main.loading }">Send</button>
+                                    data-ng-bind="main.isPublished() ? 'Save' : 'Send'"
+                                    data-ng-class="{
+                                        'btn-spinner': main.loading,
+                                        'btn-primary': !main.isPublished(),
+                                        'btn-success': main.isPublished()
+                                    }"></button>
                         </div>
                         <div class="alert" role="alert"
                              data-ng-if="main.result"

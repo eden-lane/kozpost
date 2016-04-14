@@ -450,6 +450,7 @@
 	            this.user = parsed.user;
 
 	            this.message.chat_id = parsed.channel || '';
+	            this.message.message_id = parsed.target || null;
 	            this.message.text = parsed.text;
 	        } else {
 	            this.token = '';
@@ -552,16 +553,21 @@
 	        }
 	    }, {
 	        key: '_onPublished',
-	        value: function _onPublished(result) {
-	            this._updateCache({
-	                channel: this.message.chat_id
-	            });
+	        value: function _onPublished(data) {
+	            var published = this.isPublished();
 
-	            this.message.message_id = result.message_id;
+	            if (!published) {
+	                this.message.message_id = data.result.message_id;
+
+	                this._updateCache({
+	                    channel: this.message.chat_id,
+	                    target: this.message.message_id
+	                });
+	            }
 
 	            this.result = {
 	                success: true,
-	                title: 'Post successful!'
+	                title: !published ? 'Post successful!' : 'Edit successful!'
 	            };
 	        }
 	    }, {
@@ -590,11 +596,27 @@
 	            });
 	        }
 	    }, {
+	        key: 'isPublished',
+	        value: function isPublished() {
+	            return this.message.message_id !== null;
+	        }
+	    }, {
 	        key: 'getMdConfig',
 	        value: function getMdConfig() {
 	            return {
 	                typographyfy: this.typographyfy
 	            };
+	        }
+	    }, {
+	        key: 'clear',
+	        value: function clear() {
+	            this.message.message_id = null;
+	            this.message.text = '';
+
+	            this._updateCache({
+	                target: null,
+	                text: ''
+	            });
 	        }
 	    }, {
 	        key: 'backup',
@@ -626,7 +648,9 @@
 
 	            this.loading = true;
 
-	            this._postForm('sendMessage', this.message).success(this._onPublished.bind(this)).error(function () {
+	            var method = this.isPublished() ? 'editMessageText' : 'sendMessage';
+
+	            this._postForm(method, this.message).success(this._onPublished.bind(this)).error(function () {
 	                return _this3.result = {
 	                    success: false,
 	                    title: 'Post failed!',

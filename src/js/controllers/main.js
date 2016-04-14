@@ -17,7 +17,8 @@ export default class MainCtrl {
             this.user  = parsed.user;
 
             this.message.chat_id = parsed.channel || '';
-            this.message.text    = parsed.text;
+            this.message.message_id = parsed.target || null;
+            this.message.text = parsed.text;
         } else {
             this.token = '';
             this.user  = null;
@@ -111,16 +112,21 @@ export default class MainCtrl {
         localStorage.setItem(MainCtrl.CACHE, JSON.stringify(cache));
     }
 
-    _onPublished(result) {
-        this._updateCache({
-            channel: this.message.chat_id,
-        });
+    _onPublished(data) {
+        let published = this.isPublished();
 
-        this.message.message_id = result.message_id;
+        if (!published) {
+            this.message.message_id = data.result.message_id;
+
+            this._updateCache({
+                channel: this.message.chat_id,
+                target:  this.message.message_id
+            });
+        }
 
         this.result = {
             success: true,
-            title: 'Post successful!'
+            title: !published ? 'Post successful!' : 'Edit successful!'
         };
     }
 
@@ -144,10 +150,24 @@ export default class MainCtrl {
         });
     }
 
+    isPublished() {
+        return this.message.message_id !== null;
+    }
+
     getMdConfig() {
         return {
             typographyfy: this.typographyfy
         };
+    }
+
+    clear() {
+        this.message.message_id = null;
+        this.message.text = '';
+
+        this._updateCache({
+            target: null,
+            text: ''
+        });
     }
 
     backup() {
@@ -170,7 +190,9 @@ export default class MainCtrl {
     send() {
         this.loading = true;
 
-        this._postForm('sendMessage', this.message)
+        let method = this.isPublished() ? 'editMessageText' : 'sendMessage';
+
+        this._postForm(method, this.message)
             .success(this._onPublished.bind(this))
             .error(() => this.result = {
                 success: false,
