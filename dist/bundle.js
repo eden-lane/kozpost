@@ -434,6 +434,7 @@
 	        _classCallCheck(this, MainCtrl);
 
 	        this._timeout = false;
+	        this._previous = '';
 
 	        this.loading = false;
 
@@ -557,6 +558,8 @@
 	            var published = this.isPublished();
 
 	            if (!published) {
+	                this._previous = this.message.text;
+
 	                this.message.message_id = data.result.message_id;
 
 	                this._updateCache({
@@ -601,6 +604,11 @@
 	            return this.message.message_id !== null;
 	        }
 	    }, {
+	        key: 'isSame',
+	        value: function isSame() {
+	            return this.isPublished() && angular.equals(this.message.text, this._previous);
+	        }
+	    }, {
 	        key: 'getMdConfig',
 	        value: function getMdConfig() {
 	            return {
@@ -610,6 +618,8 @@
 	    }, {
 	        key: 'clear',
 	        value: function clear() {
+	            this._previous = '';
+
 	            this.message.message_id = null;
 	            this.message.text = '';
 

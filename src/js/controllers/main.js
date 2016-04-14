@@ -1,6 +1,7 @@
 export default class MainCtrl {
     constructor($http) {
-        this._timeout = false;
+        this._timeout  = false;
+        this._previous = '';
 
         this.loading = false;
 
@@ -116,6 +117,8 @@ export default class MainCtrl {
         let published = this.isPublished();
 
         if (!published) {
+            this._previous = this.message.text;
+
             this.message.message_id = data.result.message_id;
 
             this._updateCache({
@@ -154,6 +157,10 @@ export default class MainCtrl {
         return this.message.message_id !== null;
     }
 
+    isSame() {
+        return this.isPublished() && angular.equals(this.message.text, this._previous);
+    }
+
     getMdConfig() {
         return {
             typographyfy: this.typographyfy
@@ -161,6 +168,8 @@ export default class MainCtrl {
     }
 
     clear() {
+        this._previous = '';
+
         this.message.message_id = null;
         this.message.text = '';
 
