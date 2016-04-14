@@ -605,7 +605,7 @@
 	    }
 
 	    function isNotWithinTag(str, whole) {
-	        return whole ? str + '(?!<\/.+>)' : str + '(?!<.+>)(?!(<a href=")?)([^' + str + ']*)' + str + '(?!<\/.+>)';
+	        return whole ? str + '(?!<\/.+>)' : str + '(?!<.+>)([^' + str + ']*)' + str + '(?!">)(?!<\/.+>)';
 	    }
 
 	    function setNewlines(str) {

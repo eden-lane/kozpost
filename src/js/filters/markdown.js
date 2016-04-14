@@ -8,7 +8,7 @@ export default function() {
     function isNotWithinTag(str, whole) {
         return whole
             ? str + '(?!<\/.+>)'
-            : str + '(?!<.+>)(?!(<a href=")?)([^' + str + ']*)' + str + '(?!<\/.+>)';
+            : str + '(?!<.+>)([^' + str + ']*)' + str + '(?!">)(?!<\/.+>)';
     }
 
     function setNewlines(str) {
