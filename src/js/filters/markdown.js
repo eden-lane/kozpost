@@ -8,7 +8,7 @@ export default function() {
     function isNotWithinTag(str, whole) {
         return whole
             ? str + '(?!<\/.+>)'
-            : str + '(?!<.+>)([^' + str + ']*)' + str + '(?!">)(?!<\/.+>)';
+            : str + '(?![^' + str + ']+>)(?!<.+>)([^' + str + ']*)' + str + '(?!">)(?!<\/.+>)';
     }
 
     function setNewlines(str) {
@@ -18,7 +18,7 @@ export default function() {
     let isItalic = new RegExp(isNotWithinTag('_')),
         isBold   = new RegExp(isNotWithinTag('\\*')),
         isMono   = new RegExp(isNotWithinTag('`')),
-        isLink   = new RegExp(isNotWithinTag('\\[([\\wа-яА-я]+)\\]\\(([^\\)\\]]*)\\)', true));
+        isLink   = new RegExp(isNotWithinTag('\\[([^\\]]+)\\]\\(([^\\)\\]]*)\\)', true));
 
     let matchers = [isItalic, isBold, isMono, isLink];
 

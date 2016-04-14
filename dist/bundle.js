@@ -103,7 +103,7 @@
 
 
 	// module
-	exports.push([module.id, "@keyframes spin {\n  from {\n    transform: rotate(0deg);\n  }\n  to {\n    transform: rotate(360deg);\n  }\n}\nhr.k-dilimiter {\n  margin-top: 5px;\n  margin-bottom: 5px;\n}\n.btn-spinner {\n  position: relative;\n  color: transparent !important;\n}\n.btn-spinner:before,\n.btn-spinner:after {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  content: '';\n  width: 20px;\n  height: 20px;\n  margin-top: -10px;\n  margin-left: -10px;\n  border: 2px solid rgba(0, 0, 0, 0.2);\n  border-radius: 50%;\n}\n.btn-spinner:after {\n  border-color: transparent;\n  border-top-color: white;\n  box-shadow: 0 0 0 1px transparent;\n  animation: spin .6s linear;\n  animation-iteration-count: infinite;\n}\n.k-user {\n  line-height: 22px;\n}\n.k-message {\n  resize: vertical;\n  overflow: auto;\n}\n", ""]);
+	exports.push([module.id, "@keyframes spin {\n  from {\n    transform: rotate(0deg);\n  }\n  to {\n    transform: rotate(360deg);\n  }\n}\n.btn-spinner {\n  position: relative;\n  color: transparent !important;\n}\n.btn-spinner:before,\n.btn-spinner:after {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  content: '';\n  width: 20px;\n  height: 20px;\n  margin-top: -10px;\n  margin-left: -10px;\n  border: 2px solid rgba(0, 0, 0, 0.2);\n  border-radius: 50%;\n}\n.btn-spinner:after {\n  border-color: transparent;\n  border-top-color: white;\n  box-shadow: 0 0 0 1px transparent;\n  animation: spin .6s linear;\n  animation-iteration-count: infinite;\n}\nhr.k-dilimiter {\n  margin-top: 5px;\n  margin-bottom: 5px;\n}\n.k-user {\n  line-height: 22px;\n}\n.k-message {\n  resize: vertical;\n  overflow: auto;\n}\n.k-preview {\n  padding: 0;\n  background-color: #e6e6e6;\n  font: 13px 'Open Sans';\n}\n.k-preview__inner {\n  width: 430px;\n  margin: 20px auto;\n  padding: 13px;\n  border-radius: 4px;\n  background-color: white;\n  word-break: break-word;\n  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);\n}\n", ""]);
 
 	// exports
 
@@ -619,7 +619,7 @@
 	    }
 
 	    function isNotWithinTag(str, whole) {
-	        return whole ? str + '(?!<\/.+>)' : str + '(?!<.+>)([^' + str + ']*)' + str + '(?!">)(?!<\/.+>)';
+	        return whole ? str + '(?!<\/.+>)' : str + '(?![^' + str + ']+>)(?!<.+>)([^' + str + ']*)' + str + '(?!">)(?!<\/.+>)';
 	    }
 
 	    function setNewlines(str) {
@@ -629,7 +629,7 @@
 	    var isItalic = new RegExp(isNotWithinTag('_')),
 	        isBold = new RegExp(isNotWithinTag('\\*')),
 	        isMono = new RegExp(isNotWithinTag('`')),
-	        isLink = new RegExp(isNotWithinTag('\\[([\\wа-яА-я]+)\\]\\(([^\\)\\]]*)\\)', true));
+	        isLink = new RegExp(isNotWithinTag('\\[([^\\]]+)\\]\\(([^\\)\\]]*)\\)', true));
 
 	    var matchers = [isItalic, isBold, isMono, isLink];
 
