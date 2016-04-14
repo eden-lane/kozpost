@@ -676,7 +676,7 @@
 
 	        if (config.typographyfy) {
 	            input = input.replace(/"(.+)"/g, '&laquo;$1&raquo;');
-	            input = input.replace(/\s-\s/g, ' &mdash; ');
+	            input = input.replace(/\s-\s/g, ' &ndash; ');
 	        }
 
 	        var match = getMatch(input);
