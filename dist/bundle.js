@@ -604,9 +604,52 @@
 	        return div.innerHTML;
 	    }
 
-	    function wrapWith(str, char, tag) {
-	        var exp = new RegExp('\\' + char + '(.*)\\' + char);
-	        return str.replace(exp, '<' + tag + '>$1</' + tag + '>');
+	    function isNotWithinTag(str, whole) {
+	        return whole ? str + '(?!<\/.+>)' : str + '(?!<.+>)(?!(<a href=")?)([^' + str + ']*)' + str + '(?!<\/.+>)';
+	    }
+
+	    function setNewlines(str) {
+	        return str.replace(/(?:\r\n|\r|\n)/, '<br />');
+	    }
+
+	    var isItalic = new RegExp(isNotWithinTag('_')),
+	        isBold = new RegExp(isNotWithinTag('\\*')),
+	        isMono = new RegExp(isNotWithinTag('`')),
+	        isLink = new RegExp(isNotWithinTag('\\[([\\wа-я]+)\\]\\(([^\\)\\]]*)\\)', true));
+
+	    var matchers = [isItalic, isBold, isMono, isLink];
+
+	    function getMatch(str) {
+	        var first = null;
+
+	        matchers.map(function (exp) {
+	            var m = exp.exec(str);
+	            return m === null ? -1 : m.index;
+	        }).reduce(function (p, c, i) {
+	            if (c !== -1 && (p === -1 || p !== -1 && c < p)) {
+	                first = matchers[i];
+	                return c;
+	            }
+
+	            return p;
+	        }, -1);
+
+	        return first;
+	    }
+
+	    function getWrapper(match) {
+	        switch (match) {
+	            case isItalic:
+	                return '<em>$1</em>';
+	            case isBold:
+	                return '<strong>$1</strong>';
+	            case isMono:
+	                return '<code>$1</code>';
+	            case isLink:
+	                return '<a href="$2">$1</a>';
+	            default:
+	                return '';
+	        }
 	    }
 
 	    return function (input, config) {
@@ -614,16 +657,17 @@
 	            return '';
 	        }
 
-	        var result = void 0;
+	        input = escapeHTML(input);
+	        input = input.replace(/(?:\r\n|\r|\n)/g, '<br />');
 
-	        result = escapeHTML(input);
-	        result = result.replace(/(?:\r\n|\r|\n)/g, '<br />');
-	        result = result.replace(/`([^\.]*)`/g, '<code>$1</code>');
-	        result = result.replace(/_([^_]*)_/g, '<em>$1</em>');
-	        result = result.replace(/\*([^\*]*)\*/g, '<strong>$1</strong>');
-	        result = result.replace(/\[(\w+)\](\([^\)\]]*\))/g, '<a href="$2">$1</a>');
+	        var match = getMatch(input);
 
-	        return result;
+	        while (match !== null) {
+	            input = input.replace(match, getWrapper(match));
+	            match = getMatch(input);
+	        }
+
+	        return input;
 	    };
 	};
 
