@@ -36,7 +36,7 @@ export default class MainCtrl {
     }
 
     _typographyphy(str) {
-        return str.replace(/"(.+)"/g, '«$1»').replace(/\s-\s/g, ' — ');
+        return str.replace(/"(.+)"/g, '«$1»').replace(/\s-\s/g, ' – ');
     }
 
     _serialize(data) {

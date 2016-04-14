@@ -471,7 +471,7 @@
 	    _createClass(MainCtrl, [{
 	        key: '_typographyphy',
 	        value: function _typographyphy(str) {
-	            return str.replace(/"(.+)"/g, '«$1»').replace(/\s-\s/g, ' — ');
+	            return str.replace(/"(.+)"/g, '«$1»').replace(/\s-\s/g, ' – ');
 	        }
 	    }, {
 	        key: '_serialize',
