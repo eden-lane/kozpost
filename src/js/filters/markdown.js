@@ -18,7 +18,7 @@ export default function() {
     let isItalic = new RegExp(isNotWithinTag('_')),
         isBold   = new RegExp(isNotWithinTag('\\*')),
         isMono   = new RegExp(isNotWithinTag('`')),
-        isLink   = new RegExp(isNotWithinTag('\\[([\\wа-я]+)\\]\\(([^\\)\\]]*)\\)', true));
+        isLink   = new RegExp(isNotWithinTag('\\[([\\wа-яА-я]+)\\]\\(([^\\)\\]]*)\\)', true));
 
     let matchers = [isItalic, isBold, isMono, isLink];
 
