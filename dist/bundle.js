@@ -103,7 +103,7 @@
 
 
 	// module
-	exports.push([module.id, "@keyframes spin {\n  from {\n    transform: rotate(0deg);\n  }\n  to {\n    transform: rotate(360deg);\n  }\n}\n.btn-spinner {\n  position: relative;\n  color: transparent !important;\n}\n.btn-spinner:before,\n.btn-spinner:after {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  content: '';\n  width: 20px;\n  height: 20px;\n  margin-top: -10px;\n  margin-left: -10px;\n  border: 2px solid rgba(0, 0, 0, 0.2);\n  border-radius: 50%;\n}\n.btn-spinner:after {\n  border-color: transparent;\n  border-top-color: white;\n  box-shadow: 0 0 0 1px transparent;\n  animation: spin .6s linear;\n  animation-iteration-count: infinite;\n}\n.k-user {\n  line-height: 22px;\n}\n.k-message {\n  resize: vertical;\n  overflow: auto;\n}\n", ""]);
+	exports.push([module.id, "@keyframes spin {\n  from {\n    transform: rotate(0deg);\n  }\n  to {\n    transform: rotate(360deg);\n  }\n}\nhr.k-dilimiter {\n  margin-top: 5px;\n  margin-bottom: 5px;\n}\n.btn-spinner {\n  position: relative;\n  color: transparent !important;\n}\n.btn-spinner:before,\n.btn-spinner:after {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  content: '';\n  width: 20px;\n  height: 20px;\n  margin-top: -10px;\n  margin-left: -10px;\n  border: 2px solid rgba(0, 0, 0, 0.2);\n  border-radius: 50%;\n}\n.btn-spinner:after {\n  border-color: transparent;\n  border-top-color: white;\n  box-shadow: 0 0 0 1px transparent;\n  animation: spin .6s linear;\n  animation-iteration-count: infinite;\n}\n.k-user {\n  line-height: 22px;\n}\n.k-message {\n  resize: vertical;\n  overflow: auto;\n}\n", ""]);
 
 	// exports
 
@@ -443,6 +443,8 @@
 	            disable_notification: false
 	        };
 
+	        this.typographyfy = false;
+
 	        var cache = localStorage.getItem(MainCtrl.CACHE);
 
 	        if (cache) {
@@ -467,13 +469,19 @@
 	    }
 
 	    _createClass(MainCtrl, [{
+	        key: '_typographyphy',
+	        value: function _typographyphy(str) {
+	            return str.replace(/"(.+)"/g, '«$1»').replace(/\s-\s/g, ' — ');
+	        }
+	    }, {
 	        key: '_serialize',
 	        value: function _serialize(data) {
 	            if (!angular.isObject(data)) {
 	                return data === null ? '' : data.toString();
 	            }
 
-	            var buffer = [];
+	            var buffer = [],
+	                config = this.getMdConfig();
 
 	            for (var name in data) {
 	                if (!data.hasOwnProperty(name)) {
@@ -481,6 +489,10 @@
 	                }
 
 	                var value = data[name];
+
+	                if (name === 'text' & config.typographyfy) {
+	                    value = this._typographyphy(value);
+	                }
 
 	                buffer.push(encodeURIComponent(name) + '=' + encodeURIComponent(value === null ? '' : value));
 	            }
@@ -548,7 +560,9 @@
 	    }, {
 	        key: 'getMdConfig',
 	        value: function getMdConfig() {
-	            return {};
+	            return {
+	                typographyfy: this.typographyfy
+	            };
 	        }
 	    }, {
 	        key: 'logout',
@@ -659,6 +673,11 @@
 
 	        input = escapeHTML(input);
 	        input = input.replace(/(?:\r\n|\r|\n)/g, '<br />');
+
+	        if (config.typographyfy) {
+	            input = input.replace(/"(.+)"/g, '&laquo;$1&raquo;');
+	            input = input.replace(/\s-\s/g, ' &mdash; ');
+	        }
 
 	        var match = getMatch(input);
 

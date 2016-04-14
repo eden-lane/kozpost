@@ -65,6 +65,11 @@ export default function() {
         input = escapeHTML(input);
         input = input.replace(/(?:\r\n|\r|\n)/g, '<br />');
 
+        if (config.typographyfy) {
+            input = input.replace(/"(.+)"/g, '&laquo;$1&raquo;');
+            input = input.replace(/\s-\s/g, ' &mdash; ');
+        }
+
         let match = getMatch(input);
 
         while (match !== null) {

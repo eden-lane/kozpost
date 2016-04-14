@@ -10,6 +10,8 @@ export default class MainCtrl {
             disable_notification: false
         };
 
+        this.typographyfy = false;
+
         var cache = localStorage.getItem(MainCtrl.CACHE);
 
         if (cache) {
@@ -33,12 +35,17 @@ export default class MainCtrl {
         this.login = this.__loginPartial.bind(this, $http);
     }
 
+    _typographyphy(str) {
+        return str.replace(/"(.+)"/g, '«$1»').replace(/\s-\s/g, ' — ');
+    }
+
     _serialize(data) {
         if (!angular.isObject(data)) {
             return data === null ? '' : data.toString();
         }
 
-        let buffer = [];
+        let buffer = [],
+            config = this.getMdConfig();
 
         for (var name in data) {
             if (!data.hasOwnProperty(name)) {
@@ -46,6 +53,10 @@ export default class MainCtrl {
             }
 
             let value = data[name];
+
+            if (name === 'text' & config.typographyfy) {
+                value = this._typographyphy(value);
+            }
 
             buffer.push(
                 encodeURIComponent(name) + '=' + encodeURIComponent(value === null ? '' : value)
@@ -107,7 +118,7 @@ export default class MainCtrl {
 
     getMdConfig() {
         return {
-
+            typographyfy: this.typographyfy
         };
     }
 
