@@ -1,14 +1,10 @@
 export default class MainCtrl {
     constructor($http) {
+        this._timeout = false;
+
         this.loading = false;
 
-        this.message = {
-            chat_id: '',
-            text: '',
-            parse_mode: 'Markdown',
-            disable_web_page_preview: false,
-            disable_notification: false
-        };
+        this.message = this._getBlankMessage();
 
         this.typographyfy = false;
 
@@ -21,6 +17,7 @@ export default class MainCtrl {
             this.user  = parsed.user;
 
             this.message.chat_id = parsed.channel || '';
+            this.message.text    = parsed.text;
         } else {
             this.token = '';
             this.user  = null;
@@ -35,6 +32,17 @@ export default class MainCtrl {
         this.login = this.__loginPartial.bind(this, $http);
     }
 
+    _getBlankMessage() {
+        return {
+            message_id: null,
+            chat_id: '',
+            text: '',
+            parse_mode: 'Markdown',
+            disable_web_page_preview: false,
+            disable_notification: false
+        };
+    }
+
     _typographyphy(str) {
         return str.replace(/"(.+)"/g, '«$1»').replace(/\s-\s/g, ' – ');
     }
@@ -47,20 +55,24 @@ export default class MainCtrl {
         let buffer = [],
             config = this.getMdConfig();
 
-        for (var name in data) {
-            if (!data.hasOwnProperty(name)) {
+        for (const name in data) {
+            if (!data.hasOwnProperty(name) || data[name] === null) {
                 continue;
             }
 
             let value = data[name];
 
-            if (name === 'text' & config.typographyfy) {
-                value = this._typographyphy(value);
+            switch (name) {
+                case 'text':
+                    if (config.typographyfy) {
+                        value = this._typographyphy(value);
+                    }
+                    break;
+                default:
+                    break;
             }
 
-            buffer.push(
-                encodeURIComponent(name) + '=' + encodeURIComponent(value === null ? '' : value)
-            );
+            buffer.push(encodeURIComponent(name) + '=' + encodeURIComponent(value));
         }
 
         return buffer.join('&').replace(/%20/g, '+');
@@ -77,18 +89,34 @@ export default class MainCtrl {
     _onLogin(data) {
         this.user = data.result;
 
-        localStorage.setItem(MainCtrl.CACHE, JSON.stringify({
+        this._updateCache({
             token: this.token,
             user:  this.user
-        }));
+        });
     }
 
-    _onPublished(data) {
-        var cache = JSON.parse(localStorage.getItem(MainCtrl.CACHE));
+    _updateCache(obj) {
+        this._timeout = false;
 
-        cache.channel = this.message.chat_id;
+        var cache = JSON.parse(localStorage.getItem(MainCtrl.CACHE) || '{}');
+
+        for (const name in obj) {
+            if (!obj.hasOwnProperty(name)) {
+                continue;
+            }
+
+            cache[name] = obj[name];
+        }
 
         localStorage.setItem(MainCtrl.CACHE, JSON.stringify(cache));
+    }
+
+    _onPublished(result) {
+        this._updateCache({
+            channel: this.message.chat_id,
+        });
+
+        this.message.message_id = result.message_id;
 
         this.result = {
             success: true,
@@ -122,9 +150,20 @@ export default class MainCtrl {
         };
     }
 
+    backup() {
+        if (!this._timeout) {
+            this._timeout = true;
+
+            setTimeout(() => this._updateCache({
+                text: this.message.text
+            }), 1000);
+        }
+    }
+
     logout() {
         this.token = '';
         this.user  = null;
+        this.message = this._getBlankMessage();
         localStorage.removeItem(MainCtrl.CACHE);
     }
 

@@ -433,15 +433,11 @@
 	    function MainCtrl($http) {
 	        _classCallCheck(this, MainCtrl);
 
+	        this._timeout = false;
+
 	        this.loading = false;
 
-	        this.message = {
-	            chat_id: '',
-	            text: '',
-	            parse_mode: 'Markdown',
-	            disable_web_page_preview: false,
-	            disable_notification: false
-	        };
+	        this.message = this._getBlankMessage();
 
 	        this.typographyfy = false;
 
@@ -454,6 +450,7 @@
 	            this.user = parsed.user;
 
 	            this.message.chat_id = parsed.channel || '';
+	            this.message.text = parsed.text;
 	        } else {
 	            this.token = '';
 	            this.user = null;
@@ -469,6 +466,18 @@
 	    }
 
 	    _createClass(MainCtrl, [{
+	        key: '_getBlankMessage',
+	        value: function _getBlankMessage() {
+	            return {
+	                message_id: null,
+	                chat_id: '',
+	                text: '',
+	                parse_mode: 'Markdown',
+	                disable_web_page_preview: false,
+	                disable_notification: false
+	            };
+	        }
+	    }, {
 	        key: '_typographyphy',
 	        value: function _typographyphy(str) {
 	            return str.replace(/"(.+)"/g, '«$1»').replace(/\s-\s/g, ' – ');
@@ -484,17 +493,23 @@
 	                config = this.getMdConfig();
 
 	            for (var name in data) {
-	                if (!data.hasOwnProperty(name)) {
+	                if (!data.hasOwnProperty(name) || data[name] === null) {
 	                    continue;
 	                }
 
 	                var value = data[name];
 
-	                if (name === 'text' & config.typographyfy) {
-	                    value = this._typographyphy(value);
+	                switch (name) {
+	                    case 'text':
+	                        if (config.typographyfy) {
+	                            value = this._typographyphy(value);
+	                        }
+	                        break;
+	                    default:
+	                        break;
 	                }
 
-	                buffer.push(encodeURIComponent(name) + '=' + encodeURIComponent(value === null ? '' : value));
+	                buffer.push(encodeURIComponent(name) + '=' + encodeURIComponent(value));
 	            }
 
 	            return buffer.join('&').replace(/%20/g, '+');
@@ -513,19 +528,36 @@
 	        value: function _onLogin(data) {
 	            this.user = data.result;
 
-	            localStorage.setItem(MainCtrl.CACHE, JSON.stringify({
+	            this._updateCache({
 	                token: this.token,
 	                user: this.user
-	            }));
+	            });
+	        }
+	    }, {
+	        key: '_updateCache',
+	        value: function _updateCache(obj) {
+	            this._timeout = false;
+
+	            var cache = JSON.parse(localStorage.getItem(MainCtrl.CACHE) || '{}');
+
+	            for (var name in obj) {
+	                if (!obj.hasOwnProperty(name)) {
+	                    continue;
+	                }
+
+	                cache[name] = obj[name];
+	            }
+
+	            localStorage.setItem(MainCtrl.CACHE, JSON.stringify(cache));
 	        }
 	    }, {
 	        key: '_onPublished',
-	        value: function _onPublished(data) {
-	            var cache = JSON.parse(localStorage.getItem(MainCtrl.CACHE));
+	        value: function _onPublished(result) {
+	            this._updateCache({
+	                channel: this.message.chat_id
+	            });
 
-	            cache.channel = this.message.chat_id;
-
-	            localStorage.setItem(MainCtrl.CACHE, JSON.stringify(cache));
+	            this.message.message_id = result.message_id;
 
 	            this.result = {
 	                success: true,
@@ -565,27 +597,43 @@
 	            };
 	        }
 	    }, {
+	        key: 'backup',
+	        value: function backup() {
+	            var _this2 = this;
+
+	            if (!this._timeout) {
+	                this._timeout = true;
+
+	                setTimeout(function () {
+	                    return _this2._updateCache({
+	                        text: _this2.message.text
+	                    });
+	                }, 1000);
+	            }
+	        }
+	    }, {
 	        key: 'logout',
 	        value: function logout() {
 	            this.token = '';
 	            this.user = null;
+	            this.message = this._getBlankMessage();
 	            localStorage.removeItem(MainCtrl.CACHE);
 	        }
 	    }, {
 	        key: 'send',
 	        value: function send() {
-	            var _this2 = this;
+	            var _this3 = this;
 
 	            this.loading = true;
 
 	            this._postForm('sendMessage', this.message).success(this._onPublished.bind(this)).error(function () {
-	                return _this2.result = {
+	                return _this3.result = {
 	                    success: false,
 	                    title: 'Post failed!',
 	                    text: 'Check if the channel exists & your bot is added as an administrator'
 	                };
 	            }).finally(function () {
-	                return _this2.loading = false;
+	                return _this3.loading = false;
 	            });
 	        }
 	    }]);
