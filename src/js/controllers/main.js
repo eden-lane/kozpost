@@ -153,6 +153,10 @@ export default class MainCtrl {
         });
     }
 
+    onChangeChannel() {
+        this.message.message_id = null;
+    }
+
     isPublished() {
         return this.message.message_id !== null;
     }

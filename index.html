@@ -61,6 +61,7 @@
                         <div class="form-group">
                             <input type="text" class="form-control" placeholder="@channel" required
                                    data-ng-disabled="main.loading"
+                                   data-ng-change="main.onChangeChannel()"
                                    data-ng-model="main.message.chat_id" />
                         </div>
                         <div class="form-group">
