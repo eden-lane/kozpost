@@ -71,7 +71,7 @@ export default class HotReplaceDirective {
             setter = getter.assign;
 
         document.onkeydown = function (e) {
-            if (e.ctrlKey) {
+            if (e.ctrlKey || e.metaKey) {
                 switch (e.keyCode) {
                     case 66:
                         setter(scope, this._wrapWith(el[0], '*'));
